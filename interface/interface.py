@@ -36,37 +36,159 @@ def cal_gradio(status, brand, cpu_brand, cpu, ram, storage, storage_type, gpu, s
     global data
     
     data = pd.concat([data, df], ignore_index=True)
+
+
+    def preprocess_cpu(data):
+        data['Evo_model'] = False
+        data['Pro_model'] = False
+        data['Radeon_model'] = False
+        data['Ryzen_model'] = False
+        data['CPU_model'] = ""
+
+        for index, cpu in data.iterrows():
+            cpu_name = cpu['CPU']
+            cpu_split = cpu_name.split()
+
+            if cpu_split[0] == 'Intel':
+                if cpu_split[1] == 'Evo':
+                    data.at[index, 'CPU_model'] = cpu_split[-1]
+                    data.at[index, 'Evo_model'] = True
+                elif cpu_split[1] == 'Core':
+                    data.at[index, 'CPU_model'] = cpu_split[-1]
+                elif cpu_split[-1] in ['Celeron', 'M3', 'Pentium']:
+                    data.at[index, 'CPU_model'] = cpu_split[-1]
+
+            elif cpu_split[0] == 'AMD':
+                if cpu_split[1] == 'Radeon':
+                    data.at[index, 'CPU_model'] = cpu_split[-1]
+                    data.at[index, 'Radeon_model'] = True
+                elif cpu_split[1] == 'Ryzen':
+                    data.at[index, 'CPU_model'] = cpu_split[-1]
+                    data.at[index, 'Ryzen_model'] = True
+                elif cpu_split[-1] in ['3015Ce', '3015e', '3020e', 'Athlon']:
+                    data.at[index, 'CPU_model'] = cpu_split[-1]
+
+            elif cpu_split[0] == 'Apple':
+                if cpu_split[-1] == 'Pro':
+                    data.at[index, 'Pro_model'] = True
+                data.at[index, 'CPU_model'] = cpu_split[1]
+
+        data.drop(columns=['CPU'], inplace=True)
+        return data
     
-    categorical_columns = data.select_dtypes(include=['object']).columns
-    element_to_number = {}
-    for col in categorical_columns:
-        unique_elements = data[col].unique()
-        for idx, elem in enumerate(unique_elements):
-            element_to_number[(col, elem)] = idx
+
+    def preprocess_gpu(data):
+        data['RTX_model'] = False
+        data['GTX_model'] = False
+        data['MX_model'] = False
+        data['RX_model'] = False
+        data['T_model'] = False
+        data['A_model'] = False
+        data['Radeon_model'] = False
+        data['GPU_model'] = ""
+
+        for index, gpu in data.iterrows():
+            gpu_name = gpu['GPU']
+            gpu_split = gpu_name.split()
+
+            if gpu_split[0] == 'RTX':
+                data.at[index, 'GPU_model'] = gpu_split[-1]
+                data.at[index, 'RTX_model'] = True
+
+            elif gpu_split[0] == 'GTX':
+                data.at[index, 'GPU_model'] = gpu_split[-1]
+                data.at[index, 'GTX_model'] = True
+
+            elif gpu_split[0] == 'MX':
+                data.at[index, 'GPU_model'] = gpu_split[-1]
+                data.at[index, 'MX_model'] = True
+
+            elif gpu_split[0] == 'RX':
+                data.at[index, 'GPU_model'] = gpu_split[-1]
+                data.at[index, 'RX_model'] = True
+
+            elif gpu_split[0] == 'T':
+                data.at[index, 'GPU_model'] = gpu_split[-1]
+                data.at[index, 'T_model'] = True
+
+            elif gpu_split[0] == 'A':
+                data.at[index, 'GPU_model'] = gpu_split[-1]
+                data.at[index, 'A_model'] = True
+
+            elif gpu_split[0] == 'Radeon':
+                data.at[index, 'GPU_model'] = gpu_split[-1]
+                data.at[index, 'Radeon_model'] = True
+
+        data.drop(columns=['GPU'], inplace=True)
+        return data
     
-    for col in categorical_columns:
-        data[col] = data[col].apply(lambda x: element_to_number[(col, x)])
+
+    X = data.drop('Final Price', axis=1)
+    y = np.log(data['Final Price'])   
+
+    X = preprocess_cpu(X)
+    X = preprocess_gpu(X)
+
+    X = X.astype(str)
+
+    encoder = OneHotEncoder()
+    X_encoded = encoder.fit_transform(X).toarray()
+    X = pd.DataFrame(X_encoded, columns=encoder.get_feature_names_out(X.columns))
+
+    last_row = X.iloc[-1]
+    df = pd.DataFrame([last_row], columns=X.columns)
+    X = X.iloc[:-1]
+
+    y = y.iloc[:-1]
+    y = y.dropna()
+
+    X = X.loc[y.index]
+
     
-    last_row = data.iloc[-1]
-    df = pd.DataFrame([last_row], columns=data.columns)
-    data = data.iloc[:-1]
+    X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.15,random_state=0)
+
+
     
-    if 'Final Price' in df.columns:
-        df = df.drop(columns=['Final Price']) 
+
+    rf = RandomForestRegressor(n_estimators=250,
+                                        random_state=40,
+                                        max_samples=.7,
+                                        max_features=0.1,
+                                        max_depth=23)
+    
+    rf.fit(X_train,y_train)
+    y_pred=rf.predict(df)
+
+
+
+    # categorical_columns = data.select_dtypes(include=['object']).columns
+    # element_to_number = {}
+    # for col in categorical_columns:
+    #     unique_elements = data[col].unique()
+    #     for idx, elem in enumerate(unique_elements):
+    #         element_to_number[(col, elem)] = idx
+    
+    # for col in categorical_columns:
+    #     data[col] = data[col].apply(lambda x: element_to_number[(col, x)])
+    
+    
+    
+    # if 'Final Price' in df.columns:
+    #     df = df.drop(columns=['Final Price']) 
         
-    if 'Final Price' in data.columns:
-        X = data.drop(columns=['Final Price'])
-        y = np.log(data['Final Price'])
+    # if 'Final Price' in data.columns:
+    #     X = data.drop(columns=['Final Price'])
+    #     y = np.log(data['Final Price'])
         
     
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.15, random_state=1)
+    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.15, random_state=1)
     
-    rf = RandomForestRegressor(n_estimators=300, random_state=6, max_samples=0.6, max_features=0.08, max_depth=21)
-    rf.fit(X_train, y_train)
+    # rf = RandomForestRegressor(n_estimators=300, random_state=6, max_samples=0.6, max_features=0.08, max_depth=21)
+    # rf.fit(X_train, y_train)
     
-    y_pred = rf.predict(df)
+    # y_pred = rf.predict(df)
     
-    price = np.exp(float(y_pred)) * 91.39
+    price = np.exp(float(y_pred[0])) * 91.39
 
     price = round(price,-3)
 
