@@ -158,35 +158,6 @@ def cal_gradio(status, brand, cpu_brand, cpu, ram, storage, storage_type, gpu, s
     
     rf.fit(X_train,y_train)
     y_pred=rf.predict(df)
-
-
-
-    # categorical_columns = data.select_dtypes(include=['object']).columns
-    # element_to_number = {}
-    # for col in categorical_columns:
-    #     unique_elements = data[col].unique()
-    #     for idx, elem in enumerate(unique_elements):
-    #         element_to_number[(col, elem)] = idx
-    
-    # for col in categorical_columns:
-    #     data[col] = data[col].apply(lambda x: element_to_number[(col, x)])
-    
-    
-    
-    # if 'Final Price' in df.columns:
-    #     df = df.drop(columns=['Final Price']) 
-        
-    # if 'Final Price' in data.columns:
-    #     X = data.drop(columns=['Final Price'])
-    #     y = np.log(data['Final Price'])
-        
-    
-    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.15, random_state=1)
-    
-    # rf = RandomForestRegressor(n_estimators=300, random_state=6, max_samples=0.6, max_features=0.08, max_depth=21)
-    # rf.fit(X_train, y_train)
-    
-    # y_pred = rf.predict(df)
     
     price = np.exp(float(y_pred[0])) * 91.39
 
