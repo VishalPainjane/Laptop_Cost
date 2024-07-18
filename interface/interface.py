@@ -74,38 +74,29 @@ def cal_gradio(status, brand, cpu_brand, cpu, ram, storage, storage_type, gpu, s
     return price
 
 
-status_dropdown = gr.Dropdown(choices=['New', 'Refurbished'], label="Status")
-brand_dropdown = gr.Dropdown(choices=['Apple','Razer','Asus', 'HP', 'Alurin', 'MSI', 'Lenovo', 'Medion', 'Acer', 'Gigabyte', 'Dell', 'LG', 'Microsoft'], label="Brand")
-cpu_brand_textbox = gr.Dropdown(choices=['Intel', 'AMD', 'Apple'], label="CPU Brand")
-cpu_textbox = gr.Dropdown(choices=['Intel Core i9','Intel Core i7','Intel Core i5', 'Intel Core i3', 'Intel Evo Core i7', 'Intel Evo Core i5', 'Intel Celeron', 
-        'Apple M1','Apple M1 Pro','Apple M2','Apple M2 Pro','AMD Ryzen 9','AMD Ryzen 7', 'AMD Ryzen 5',  'AMD Ryzen 3', 
-        'AMD Radeon 9','AMD Radeon 5','AMD Athlon',  
-        'AMD 3020e',
-        'Intel Pentium',   'AMD 3015e',
-         'Intel Core M3',  'AMD 3015Ce'], label="CPU")
-ram_textbox = gr.Dropdown(choices=[64,32,16,12,8,4], label="RAM")
-storage_textbox = gr.Dropdown(choices=[4000, 3000,2000,1000,512,500,256,240,128,64,32,0], label="Storage")
-storage_type_dropdown = gr.Dropdown(choices=['SSD', 'eMMC', 'NO_STORAGE'], label="Storage Type")
-gpu_textbox = gr.Dropdown(choices=['NO_GPU', 'RTX 4090','RTX 4080','RTX 4060','RTX 4070','RTX 4050','RTX 3080','RTX 3070', 'RTX 3060','RTX 3050', 'RTX 2080','RTX 2070','RTX 2060', 'RTX 2050',  'RTX A1000', 'RTX 3000','RTX A5500','RTX A3000',  'RTX A2000',
-        'GTX 1660', 'GTX 1650','GTX 1050','GTX 1070',
-        'RX 6500M','RX 7600S','RX 6800S','RX 6700M',  'MX 550','MX 330', 'MX 450', 'MX 130',
-        'A 370M','A 730M',
-        'T 1200','T 2000', 'T 500', 'T 550','T 600', 'T 1000',  '610 M', 
-        'Radeon Pro 5500M', 'Radeon RX 6600M', 'Radeon Pro RX 560X','Radeon Pro 5300M',
-        'P 500'], label="GPU")
-
-screen_textbox =gr.Slider(label="Screen size(Inches)", minimum=10, maximum=17, step=1)
-
-
-touch_checkbox = gr.Checkbox(label="Touch Screen")
+status_dropdown = gr.Dropdown(choices=['New', 'Refurbished'], label="Condition", info="Select whether the laptop is new or refurbished.")
+brand_dropdown = gr.Dropdown(choices=['Apple', 'Razer', 'Asus', 'HP', 'Alurin', 'MSI', 'Lenovo', 'Medion', 'Acer', 'Gigabyte', 'Dell', 'LG', 'Microsoft'], label="Preferred Brand", info="Choose the brand of your desired laptop.")
+cpu_brand_dropdown = gr.Dropdown(choices=['Intel', 'AMD', 'Apple'], label="Choose Your CPU Brand", info="Select the brand of the CPU.")
+cpu_dropdown = gr.Dropdown(choices=['Intel Core i9', 'Intel Core i7', 'Intel Core i5', 'Intel Core i3', 'Intel Evo Core i7', 'Intel Evo Core i5', 'Intel Celeron',
+                                    'Apple M1', 'Apple M1 Pro', 'Apple M2', 'Apple M2 Pro', 'AMD Ryzen 9', 'AMD Ryzen 7', 'AMD Ryzen 5', 'AMD Ryzen 3',
+                                    'AMD Radeon 9', 'AMD Radeon 5', 'AMD Athlon', 'AMD 3020e', 'Intel Pentium', 'AMD 3015e', 'Intel Core M3', 'AMD 3015Ce'], label="Select Your CPU", info="Choose the CPU model.")
+ram_dropdown = gr.Dropdown(choices=[64, 32, 16, 12, 8, 4], label="Memory (RAM) in GB", info="Select the amount of RAM.")
+storage_dropdown = gr.Dropdown(choices=[4000, 3000, 2000, 1000, 512, 500, 256, 240, 128, 64, 32, 0], label="Storage Capacity in GB", info="Choose the storage capacity.")
+storage_type_dropdown = gr.Dropdown(choices=['SSD', 'eMMC', 'NO_STORAGE'], label="Type of Storage", info="Select the type of storage.")
+gpu_dropdown = gr.Dropdown(choices=['NO_GPU', 'RTX 4090', 'RTX 4080', 'RTX 4060', 'RTX 4070', 'RTX 4050', 'RTX 3080', 'RTX 3070', 'RTX 3060', 'RTX 3050', 'RTX 2080', 'RTX 2070', 'RTX 2060', 'RTX 2050', 'RTX A1000', 'RTX 3000', 'RTX A5500', 'RTX A3000', 'RTX A2000',
+                                    'GTX 1660', 'GTX 1650', 'GTX 1050', 'GTX 1070', 'RX 6500M', 'RX 7600S', 'RX 6800S', 'RX 6700M', 'MX 550', 'MX 330', 'MX 450', 'MX 130',
+                                    'A 370M', 'A 730M', 'T 1200', 'T 2000', 'T 500', 'T 550', 'T 600', 'T 1000', '610 M', 'Radeon Pro 5500M', 'Radeon RX 6600M', 'Radeon Pro RX 560X', 'Radeon Pro 5300M', 'P 500'], label="Choose Your GPU", info="Select the GPU model.")
+screen_slider = gr.Slider(label="Screen Size (in Inches)", minimum=10, maximum=17, step=1, info="Select the screen size in inches.")
+touch_checkbox = gr.Checkbox(label="Includes Touch Screen", info="Check if the laptop includes a touch screen.")
 
 iface = gr.Interface(
     fn=cal_gradio,
-    inputs=[status_dropdown, brand_dropdown, cpu_brand_textbox, cpu_textbox, ram_textbox,
-            storage_textbox, storage_type_dropdown, gpu_textbox, screen_textbox,
+    inputs=[status_dropdown, brand_dropdown, cpu_brand_dropdown, cpu_dropdown, ram_dropdown,
+            storage_type_dropdown,storage_dropdown,  gpu_dropdown, screen_slider,
             touch_checkbox],
     outputs="number",
-    title="How much does your LAPTOP Cost(₹XXXXX.X/-)"
-)
+    title="Laptop Cost Estimator",
+    description="<div style='text-align: center;'>Use this model to estimate the cost of a laptop based on your selected specifications. Simply choose your desired options from the dropdown menus and see the estimated price.</div>",
+    )
 
 iface.launch()
